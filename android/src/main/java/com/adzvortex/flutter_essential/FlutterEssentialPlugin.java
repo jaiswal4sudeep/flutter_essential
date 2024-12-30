@@ -3,8 +3,6 @@ package com.adzvortex.flutter_essential;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -56,14 +54,12 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
             case "shareToSpecificApp":
                 String content = call.argument("content");
                 String app = call.argument("app");
-                shareToSpecificApp(content, app);
-                result.success(null); 
+                shareToSpecificApp(content, app, result);
                 break;
 
             case "shareToAllApps":
                 String allContent = call.argument("content");
-                shareToAllApps(allContent);
-                result.success(null);
+                shareToAllApps(allContent, result);
                 break;
 
             default:
@@ -146,30 +142,39 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
     }
 
     // Share content to a specific app
-    private void shareToSpecificApp(String content, String appName) {
+    private void shareToSpecificApp(String content, String packageName, Result result) {
         try {
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("text/plain");
             intent.putExtra(Intent.EXTRA_TEXT, content);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); 
-            intent.setPackage(appName); 
-            context.startActivity(intent);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // Required for non-Activity context
+            intent.setPackage(packageName); // Set the specific app's package name
+
+            if (intent.resolveActivity(context.getPackageManager()) != null) {
+                context.startActivity(intent);
+                result.success(null);
+            } else {
+                result.error("APP_NOT_FOUND", "App is not installed.", null);
+            }
         } catch (Exception e) {
             e.printStackTrace();
+            result.error("ERROR", "Error sharing content.", e.getMessage());
         }
     }
 
     // Share content to all apps (Open with dialog)
-    private void shareToAllApps(String content) {
+    private void shareToAllApps(String content, Result result) {
         try {
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("text/plain");
             intent.putExtra(Intent.EXTRA_TEXT, content);
             Intent chooser = Intent.createChooser(intent, "Share using");
-            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); 
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // Fix for non-Activity context
             context.startActivity(chooser);
+            result.success(null);
         } catch (Exception e) {
             e.printStackTrace();
+            result.error("ERROR", "Error sharing content.", e.getMessage());
         }
     }
 
