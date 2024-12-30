@@ -109,8 +109,7 @@ class FlutterEssential {
   //* Get Device id */
   static Future<String?> getDeviceId() async {
     try {
-      final String? result = await _methodChannel.invokeMethod('getAndroidId');
-      return result;
+      return await _methodChannel.invokeMethod('getAndroidId') ?? '';
     } catch (e) {
       debugPrint('Error fetching device id: $e');
       return null;
@@ -133,7 +132,7 @@ class FlutterEssential {
   }
 
   //* Share content to specific app */
-  static Future<bool> shareToSpecificApp({
+  static Future<void> shareToSpecificApp({
     required String content,
     required SharingApp app,
   }) async {
@@ -143,12 +142,9 @@ class FlutterEssential {
         'app': app.name,
       };
 
-      final bool isAppInstalled =
-          await _methodChannel.invokeMethod('shareToSpecificApp', arguments);
-      return isAppInstalled;
+      await _methodChannel.invokeMethod('shareToSpecificApp', arguments);
     } catch (e) {
       debugPrint('Error sharing to specific app: $e');
-      return false;
     }
   }
 }

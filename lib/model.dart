@@ -37,16 +37,16 @@ enum SharingApp {
   facebookMessenger,
   instagramDirect;
 
-  String get name {
+  String get packageName {
     switch (this) {
       case SharingApp.whatsapp:
-        return 'whatsapp';
+        return 'com.whatsapp';
       case SharingApp.telegram:
-        return 'telegram';
+        return 'org.telegram.messenger';
       case SharingApp.facebookMessenger:
-        return 'facebookMessenger';
+        return 'com.facebook.orca';
       case SharingApp.instagramDirect:
-        return 'instagramDirect';
+        return 'com.instagram.android';
     }
   }
 }

@@ -56,14 +56,14 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
             case "shareToSpecificApp":
                 String content = call.argument("content");
                 String app = call.argument("app");
-                boolean isAppInstalled = shareToSpecificApp(content, app);
-                result.success(isAppInstalled);
+                shareToSpecificApp(content, app);
+                result.success(null); 
                 break;
 
             case "shareToAllApps":
-                String allContent = call.argument("content");
-                shareToAllApps(allContent);
-                result.success(null); // No specific result to return
+                String content = call.argument("content");
+                shareToAllApps(content);
+                result.success(null);
                 break;
 
             default:
@@ -146,26 +146,16 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
     }
 
     // Share content to a specific app
-    private boolean shareToSpecificApp(String content, String appName) {
+    private void shareToSpecificApp(String content, String appName) {
         try {
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("text/plain");
             intent.putExtra(Intent.EXTRA_TEXT, content);
-
-            PackageManager packageManager = context.getPackageManager();
-            List<ResolveInfo> apps = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-
-            for (ResolveInfo app : apps) {
-                if (app.activityInfo.packageName.contains(appName)) {
-                    intent.setPackage(app.activityInfo.packageName);
-                    context.startActivity(intent);
-                    return true; // App is installed, content shared
-                }
-            }
-            return false; // App is not installed
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); 
+            intent.setPackage(appName); 
+            context.startActivity(intent);
         } catch (Exception e) {
             e.printStackTrace();
-            return false; // Error occurred
         }
     }
 
@@ -176,7 +166,7 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
             intent.setType("text/plain");
             intent.putExtra(Intent.EXTRA_TEXT, content);
             Intent chooser = Intent.createChooser(intent, "Share using");
-            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); 
             context.startActivity(chooser);
         } catch (Exception e) {
             e.printStackTrace();
