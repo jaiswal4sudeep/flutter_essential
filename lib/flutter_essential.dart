@@ -81,7 +81,7 @@ class FlutterEssential {
   }
 
   //* Get package information */
-  static Future<PackageInfo?> getPackageInfo() async {
+  static Future<PackageInfo> getPackageInfo() async {
     try {
       final result =
           await _methodChannel.invokeMethod<String>('getPackageInfo');
@@ -89,10 +89,20 @@ class FlutterEssential {
         final Map<String, dynamic> parsedResult = jsonDecode(result);
         return PackageInfo.fromMap(parsedResult);
       }
-      return null;
+      return PackageInfo(
+        appName: '',
+        packageName: '',
+        version: '',
+        buildNumber: '',
+      );
     } catch (e) {
       debugPrint('Error fetching package info: $e');
-      return null;
+      return PackageInfo(
+        appName: '',
+        packageName: '',
+        version: '',
+        buildNumber: '',
+      );
     }
   }
 
