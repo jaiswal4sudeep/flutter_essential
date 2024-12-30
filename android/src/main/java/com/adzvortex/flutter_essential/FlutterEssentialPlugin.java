@@ -61,8 +61,8 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
                 break;
 
             case "shareToAllApps":
-                String content = call.argument("content");
-                shareToAllApps(content);
+                String allContent = call.argument("content");
+                shareToAllApps(allContent);
                 result.success(null);
                 break;
 
