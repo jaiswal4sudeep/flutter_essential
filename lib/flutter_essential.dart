@@ -116,4 +116,39 @@ class FlutterEssential {
       return null;
     }
   }
+
+  //* Share content to all apps */
+  static Future<void> shareToAllApps({
+    required String content,
+  }) async {
+    try {
+      final Map<String, dynamic> arguments = {
+        'content': content,
+      };
+
+      await _methodChannel.invokeMethod('shareToAllApps', arguments);
+    } catch (e) {
+      debugPrint('Error sharing to all apps: $e');
+    }
+  }
+
+  //* Share content to specific app */
+  static Future<bool> shareToSpecificApp({
+    required String content,
+    required SharingApp app,
+  }) async {
+    try {
+      final Map<String, dynamic> arguments = {
+        'content': content,
+        'app': app.name,
+      };
+
+      final bool isAppInstalled =
+          await _methodChannel.invokeMethod('shareToSpecificApp', arguments);
+      return isAppInstalled;
+    } catch (e) {
+      debugPrint('Error sharing to specific app: $e');
+      return false;
+    }
+  }
 }

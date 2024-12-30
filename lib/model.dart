@@ -29,3 +29,24 @@ class PackageInfo {
     };
   }
 }
+
+// Enum for specific apps to share content
+enum SharingApp {
+  whatsapp,
+  telegram,
+  facebookMessenger,
+  instagramDirect;
+
+  String get name {
+    switch (this) {
+      case SharingApp.whatsapp:
+        return 'whatsapp';
+      case SharingApp.telegram:
+        return 'telegram';
+      case SharingApp.facebookMessenger:
+        return 'facebookMessenger';
+      case SharingApp.instagramDirect:
+        return 'instagramDirect';
+    }
+  }
+}
