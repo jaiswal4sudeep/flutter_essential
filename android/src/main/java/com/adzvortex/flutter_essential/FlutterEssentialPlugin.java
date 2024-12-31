@@ -155,7 +155,7 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
 
             try {
                 context.startActivity(intent);
-                result.success(null); // Sharing successful
+                result.success(null); 
             } catch (android.content.ActivityNotFoundException ex) {
                 result.error("APP_NOT_FOUND", "App is not installed.", null);
             } catch (Exception e) {

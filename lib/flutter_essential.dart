@@ -60,8 +60,7 @@ class FlutterEssential {
   //* Check if VPN is connected */
   static Future<bool> isVpnConnected() async {
     try {
-      final bool result = await _methodChannel.invokeMethod('isVpnConnected');
-      return result;
+      return await _methodChannel.invokeMethod('isVpnConnected') ?? false;
     } catch (e) {
       debugPrint('Error checking VPN status: $e');
       return false;
@@ -71,9 +70,7 @@ class FlutterEssential {
   //* Check if Internet is connected */
   static Future<bool> isInternetConnected() async {
     try {
-      final bool result =
-          await _methodChannel.invokeMethod('isInternetConnected');
-      return result;
+      return await _methodChannel.invokeMethod('isInternetConnected') ?? false;
     } catch (e) {
       debugPrint('Error checking Internet status: $e');
       return false;
@@ -107,12 +104,12 @@ class FlutterEssential {
   }
 
   //* Get Device id */
-  static Future<String?> getDeviceId() async {
+  static Future<String> getDeviceId() async {
     try {
       return await _methodChannel.invokeMethod('getAndroidId') ?? '';
     } catch (e) {
       debugPrint('Error fetching device id: $e');
-      return null;
+      return '';
     }
   }
 
@@ -120,15 +117,11 @@ class FlutterEssential {
   static Future<void> shareToAllApps({
     required String content,
   }) async {
-    try {
-      final Map<String, dynamic> arguments = {
-        'content': content,
-      };
+    final Map<String, dynamic> arguments = {
+      'content': content,
+    };
 
-      await _methodChannel.invokeMethod('shareToAllApps', arguments);
-    } catch (e) {
-      debugPrint('Error sharing to all apps: $e');
-    }
+    await _methodChannel.invokeMethod('shareToAllApps', arguments);
   }
 
   //* Share content to specific app */
@@ -136,15 +129,11 @@ class FlutterEssential {
     required String content,
     required SharingApp app,
   }) async {
-    try {
-      final Map<String, dynamic> arguments = {
-        'content': content,
-        'app': app.packageName,
-      };
+    final Map<String, dynamic> arguments = {
+      'content': content,
+      'app': app.packageName,
+    };
 
-      await _methodChannel.invokeMethod('shareToSpecificApp', arguments);
-    } catch (e) {
-      debugPrint('Error sharing to specific app: $e');
-    }
+    await _methodChannel.invokeMethod('shareToSpecificApp', arguments);
   }
 }
