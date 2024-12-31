@@ -139,7 +139,7 @@ class FlutterEssential {
     try {
       final Map<String, dynamic> arguments = {
         'content': content,
-        'app': app.name,
+        'app': app.packageName,
       };
 
       await _methodChannel.invokeMethod('shareToSpecificApp', arguments);

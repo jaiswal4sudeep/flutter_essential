@@ -7,6 +7,7 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.provider.Settings;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -144,20 +145,24 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
     // Share content to a specific app
     private void shareToSpecificApp(String content, String packageName, Result result) {
         try {
+            Log.d("FlutterEssentialPlugin", "App: " + packageName + " | Content: " + content);
+
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("text/plain");
             intent.putExtra(Intent.EXTRA_TEXT, content);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // Required for non-Activity context
-            intent.setPackage(packageName); // Set the specific app's package name
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setPackage(packageName);
 
-            if (intent.resolveActivity(context.getPackageManager()) != null) {
+            try {
                 context.startActivity(intent);
-                result.success(null);
-            } else {
+                result.success(null); // Sharing successful
+            } catch (android.content.ActivityNotFoundException ex) {
                 result.error("APP_NOT_FOUND", "App is not installed.", null);
+            } catch (Exception e) {
+                result.error("ERROR", "Error sharing content.", e.getMessage());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("FlutterEssentialPlugin", "Error sharing content to package: " + packageName, e);
             result.error("ERROR", "Error sharing content.", e.getMessage());
         }
     }
@@ -169,7 +174,7 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
             intent.setType("text/plain");
             intent.putExtra(Intent.EXTRA_TEXT, content);
             Intent chooser = Intent.createChooser(intent, "Share using");
-            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // Fix for non-Activity context
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); 
             context.startActivity(chooser);
             result.success(null);
         } catch (Exception e) {
