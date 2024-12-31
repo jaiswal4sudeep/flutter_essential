@@ -137,14 +137,13 @@ class FlutterEssential {
     await _methodChannel.invokeMethod('shareToSpecificApp', arguments);
   }
 
-  //* Play sound */
-  static Future<void> playSound(String filePath) async {
+  //* Check if device is an emulator */
+  static Future<bool> isEmulator() async {
     try {
-      await _methodChannel.invokeMethod('playSound', {
-        'filePath': filePath,
-      });
+      return await _methodChannel.invokeMethod<bool>('isEmulator') ?? false;
     } catch (e) {
-      debugPrint('Error playing sound: $e');
+      debugPrint('Error checking if device is an emulator: $e');
+      return false;
     }
   }
 }

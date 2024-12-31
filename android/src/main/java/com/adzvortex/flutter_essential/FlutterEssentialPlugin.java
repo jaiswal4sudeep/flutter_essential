@@ -4,10 +4,10 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
-import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -25,10 +25,8 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 
 public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler {
-
     private MethodChannel channel;
     private Context context;
-    private MediaPlayer mediaPlayer;
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
@@ -56,6 +54,10 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
                 result.success(getAndroidId());
                 break;
 
+            case "isEmulator": // New case for isEmulator
+                result.success(isEmulator());
+                break;
+
             case "shareToSpecificApp":
                 String content = call.argument("content");
                 String app = call.argument("app");
@@ -65,15 +67,6 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
             case "shareToAllApps":
                 String allContent = call.argument("content");
                 shareToAllApps(allContent, result);
-                break;
-
-            case "playSound":
-                String filePath = call.argument("filePath");
-                if (filePath != null) {
-                    playSound(filePath, result);
-                } else {
-                    result.error("INVALID_ARGUMENT", "File path is required", null);
-                }
                 break;
 
             default:
@@ -155,6 +148,26 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
         }
     }
 
+    // Check if the device is an emulator
+    private boolean isEmulator() {
+        return (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+                || Build.FINGERPRINT.startsWith("generic")
+                || Build.FINGERPRINT.startsWith("unknown")
+                || Build.HARDWARE.contains("goldfish")
+                || Build.HARDWARE.contains("ranchu")
+                || Build.MODEL.contains("google_sdk")
+                || Build.MODEL.contains("Emulator")
+                || Build.MODEL.contains("Android SDK built for x86")
+                || Build.MANUFACTURER.contains("Genymotion")
+                || Build.PRODUCT.contains("sdk_google")
+                || Build.PRODUCT.contains("google_sdk")
+                || Build.PRODUCT.contains("sdk")
+                || Build.PRODUCT.contains("sdk_x86")
+                || Build.PRODUCT.contains("vbox86p")
+                || Build.PRODUCT.contains("emulator")
+                || Build.PRODUCT.contains("simulator");
+    }
+
     // Share content to a specific app
     private void shareToSpecificApp(String content, String packageName, Result result) {
         try {
@@ -195,65 +208,6 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
             result.error("ERROR", "Error sharing content.", e.getMessage());
         }
     }
-
-    // Play sound from assets
-private void playSound(String filePath, Result result) {
-    try {
-        // Check if the file exists in assets
-        AssetFileDescriptor afd = null;
-        boolean fileExists = true;
-        try {
-            afd = context.getAssets().openFd(filePath);
-        } catch (IOException e) {
-            Log.e("FlutterEssentialPlugin", "File not found: " + filePath, e);
-            fileExists = false;
-        }
-
-        if (!fileExists) {
-            result.error("FILE_NOT_FOUND", "The file does not exist: " + filePath, null);
-            return; // Exit the method if the file doesn't exist
-        }
-
-        if (afd == null) {
-            result.error("FILE_NOT_FOUND", "The file descriptor is null for: " + filePath, null);
-            return;
-        }
-
-        // Release the previous media player instance if any
-        if (mediaPlayer != null) {
-            mediaPlayer.release();
-        }
-
-        mediaPlayer = new MediaPlayer();
-
-        // Load the asset file descriptor into MediaPlayer
-        mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-        afd.close();
-
-        // Prepare and start playback
-        mediaPlayer.prepare();
-        mediaPlayer.setOnPreparedListener(mp -> {
-            mediaPlayer.start();
-            result.success(null); // Notify success
-        });
-
-        // Release resources once playback is complete
-        mediaPlayer.setOnCompletionListener(mp -> {
-            mp.release();
-            mediaPlayer = null;
-        });
-
-        mediaPlayer.setOnErrorListener((mp, what, extra) -> {
-            result.error("PLAY_ERROR", "Error during playback.", null);
-            return true;
-        });
-
-    } catch (Exception e) {
-        Log.e("FlutterEssentialPlugin", "Error playing sound: " + filePath, e);
-        result.error("PLAY_ERROR", "Error playing sound: " + e.getMessage(), null);
-    }
-}
-
 
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
