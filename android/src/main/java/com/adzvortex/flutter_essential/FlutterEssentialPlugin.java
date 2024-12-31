@@ -3,6 +3,8 @@ package com.adzvortex.flutter_essential;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
+import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -14,6 +16,7 @@ import androidx.annotation.NonNull;
 import java.net.NetworkInterface;
 import java.util.Collections;
 import java.util.List;
+import java.io.IOException;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.MethodCall;
@@ -25,6 +28,7 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
 
     private MethodChannel channel;
     private Context context;
+    private MediaPlayer mediaPlayer;
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
@@ -61,6 +65,15 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
             case "shareToAllApps":
                 String allContent = call.argument("content");
                 shareToAllApps(allContent, result);
+                break;
+
+            case "playSound":
+                String filePath = call.argument("filePath");
+                if (filePath != null) {
+                    playSound(filePath, result);
+                } else {
+                    result.error("INVALID_ARGUMENT", "File path is required", null);
+                }
                 break;
 
             default:
@@ -155,7 +168,7 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
 
             try {
                 context.startActivity(intent);
-                result.success(null); 
+                result.success(null);
             } catch (android.content.ActivityNotFoundException ex) {
                 result.error("APP_NOT_FOUND", "App is not installed.", null);
             } catch (Exception e) {
@@ -174,7 +187,7 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
             intent.setType("text/plain");
             intent.putExtra(Intent.EXTRA_TEXT, content);
             Intent chooser = Intent.createChooser(intent, "Share using");
-            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); 
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(chooser);
             result.success(null);
         } catch (Exception e) {
@@ -182,6 +195,65 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
             result.error("ERROR", "Error sharing content.", e.getMessage());
         }
     }
+
+    // Play sound from assets
+private void playSound(String filePath, Result result) {
+    try {
+        // Check if the file exists in assets
+        AssetFileDescriptor afd = null;
+        boolean fileExists = true;
+        try {
+            afd = context.getAssets().openFd(filePath);
+        } catch (IOException e) {
+            Log.e("FlutterEssentialPlugin", "File not found: " + filePath, e);
+            fileExists = false;
+        }
+
+        if (!fileExists) {
+            result.error("FILE_NOT_FOUND", "The file does not exist: " + filePath, null);
+            return; // Exit the method if the file doesn't exist
+        }
+
+        if (afd == null) {
+            result.error("FILE_NOT_FOUND", "The file descriptor is null for: " + filePath, null);
+            return;
+        }
+
+        // Release the previous media player instance if any
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+        }
+
+        mediaPlayer = new MediaPlayer();
+
+        // Load the asset file descriptor into MediaPlayer
+        mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+        afd.close();
+
+        // Prepare and start playback
+        mediaPlayer.prepare();
+        mediaPlayer.setOnPreparedListener(mp -> {
+            mediaPlayer.start();
+            result.success(null); // Notify success
+        });
+
+        // Release resources once playback is complete
+        mediaPlayer.setOnCompletionListener(mp -> {
+            mp.release();
+            mediaPlayer = null;
+        });
+
+        mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+            result.error("PLAY_ERROR", "Error during playback.", null);
+            return true;
+        });
+
+    } catch (Exception e) {
+        Log.e("FlutterEssentialPlugin", "Error playing sound: " + filePath, e);
+        result.error("PLAY_ERROR", "Error playing sound: " + e.getMessage(), null);
+    }
+}
+
 
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {

@@ -1,6 +1,6 @@
 # Flutter Essential Plugin
 
-A Flutter plugin for VPN detection, internet connectivity checks, package information retrieval, device identification, and sharing content.
+A Flutter plugin for VPN detection, internet connectivity checks, package information retrieval, device identification, content sharing, and playing local audio files.
 
 ## Features
 1. **VPN Status Checker**: Detect VPN connection.
@@ -8,6 +8,7 @@ A Flutter plugin for VPN detection, internet connectivity checks, package inform
 3. **Package Information**: Retrieve app metadata.
 4. **Device ID**: Fetch unique Android ID.
 5. **Share Content**: Share content to all or specific apps.
+6. **Play Local Sound**: Play audio files stored in the assets folder.
 
 ## Installation
 Add to `pubspec.yaml`:
@@ -58,6 +59,12 @@ await FlutterEssential.shareToSpecificApp(
 );
 ```
 
+### Play Local Sound
+Plays an audio file stored in the assets folder.
+```dart
+await FlutterEssential.playSound('assets/sfx/music.mp3');
+```
+
 ## Example
 ```dart
 import 'package:flutter_essential/flutter_essential.dart';
@@ -65,19 +72,22 @@ import 'package:flutter_essential/flutter_essential.dart';
 void main() async {
   bool vpn = await FlutterEssential.isVpnConnected();
   bool internet = await FlutterEssential.isInternetConnected();
-  print('VPN: $vpn, Internet: $internet');
+  print('VPN: \$vpn, Internet: \$internet');
 
   await FlutterEssential.shareToAllApps(content: "Sharing to all apps!");
   await FlutterEssential.shareToSpecificApp(
     content: "Sharing to WhatsApp!",
     app: SharingApp.whatsapp,
   );
+
+  await FlutterEssential.playSound('assets/sfx/music.mp3');
 }
 ```
 
 ## Permissions
 Add to `AndroidManifest.xml`:
 ```xml
+<uses-permission android:name="android.permission.INTERNET" />
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 ```

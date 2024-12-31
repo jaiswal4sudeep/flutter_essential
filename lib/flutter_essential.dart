@@ -136,4 +136,15 @@ class FlutterEssential {
 
     await _methodChannel.invokeMethod('shareToSpecificApp', arguments);
   }
+
+  //* Play sound */
+  static Future<void> playSound(String filePath) async {
+    try {
+      await _methodChannel.invokeMethod('playSound', {
+        'filePath': filePath,
+      });
+    } catch (e) {
+      debugPrint('Error playing sound: $e');
+    }
+  }
 }
