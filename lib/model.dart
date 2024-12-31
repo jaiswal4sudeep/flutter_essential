@@ -30,12 +30,11 @@ class PackageInfo {
   }
 }
 
-// Enum for specific apps to share content
 enum SharingApp {
   whatsapp,
   telegram,
-  facebookMessenger,
-  instagramDirect;
+  instagram,
+  facebookMessenger;
 
   String get packageName {
     switch (this) {
@@ -43,10 +42,10 @@ enum SharingApp {
         return 'com.whatsapp';
       case SharingApp.telegram:
         return 'org.telegram.messenger';
+      case SharingApp.instagram:
+        return 'com.instagram.android';
       case SharingApp.facebookMessenger:
         return 'com.facebook.orca';
-      case SharingApp.instagramDirect:
-        return 'com.instagram.android';
     }
   }
 }
