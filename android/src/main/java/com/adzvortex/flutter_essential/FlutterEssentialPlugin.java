@@ -69,11 +69,6 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
                 shareToAllApps(allContent, result);
                 break;
 
-            case "openApp":
-                String packageName = call.argument("package");
-                openApp(packageName, result);
-                break;
-
             default:
                 result.notImplemented();
                 break;
