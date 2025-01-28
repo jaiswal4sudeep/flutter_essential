@@ -146,4 +146,16 @@ class FlutterEssential {
       return false;
     }
   }
+
+  //* Open app using package name */
+  static Future<void> openApp({
+    required String packageName,
+  }) async {
+    final Map<String, dynamic> arguments = {
+      'content': 'test',
+      'app': packageName,
+    };
+
+    await _methodChannel.invokeMethod('shareToSpecificApp', arguments);
+  }
 }
