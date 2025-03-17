@@ -16,7 +16,7 @@ Add the plugin to your `pubspec.yaml` file:
 ```yaml
 flutter_essential:
   git:
-    url: https://github.com/Apex-Eagle-Solution-LLC/flutter_essential.git
+    url: https://github.com/jaiswal4sudeep/flutter_essential.git
 ```
 
 Run `flutter pub get` to fetch the package.

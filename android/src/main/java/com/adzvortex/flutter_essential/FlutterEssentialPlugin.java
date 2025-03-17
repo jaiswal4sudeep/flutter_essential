@@ -3,7 +3,6 @@ package com.adzvortex.flutter_essential;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetFileDescriptor;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -16,7 +15,6 @@ import androidx.annotation.NonNull;
 import java.net.NetworkInterface;
 import java.util.Collections;
 import java.util.List;
-import java.io.IOException;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.MethodCall;
@@ -54,7 +52,12 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
                 result.success(getAndroidId());
                 break;
 
-            case "isEmulator": // New case for isEmulator
+            case "getDeviceName":
+                String deviceName = Build.MANUFACTURER + " " + Build.MODEL;
+                result.success(deviceName);
+                break;
+
+            case "isEmulator": 
                 result.success(isEmulator());
                 break;
 

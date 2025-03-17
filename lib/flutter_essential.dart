@@ -113,6 +113,16 @@ class FlutterEssential {
     }
   }
 
+  //* Get Device Name */
+  static Future<String> getDeviceName() async {
+    try {
+      return await _methodChannel.invokeMethod('getDeviceName') ?? '';
+    } catch (e) {
+      debugPrint('Error fetching device name: $e');
+      return '';
+    }
+  }
+
   //* Share content to all apps */
   static Future<void> shareToAllApps({
     required String content,
