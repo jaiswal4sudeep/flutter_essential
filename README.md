@@ -1,106 +1,153 @@
-
 # Flutter Essential Plugin
 
-A Flutter plugin for VPN detection, internet connectivity checks, package information retrieval, device identification, emulator detection, and content sharing.
+`flutter_essential` is a Flutter plugin designed to provide essential utility functions including VPN and internet status monitoring, device information retrieval, content sharing, app launching, and vibration controls — all through a single, clean API.
 
-## Features
-1. **VPN Status Checker**: Detect VPN connection.
-2. **Internet Connectivity Checker**: Check Wi-Fi/Mobile Data connection.
-3. **Package Information**: Retrieve app metadata.
-4. **Device ID**: Fetch unique Android ID.
-5. **Emulator Detection**: Determine if the app is running on an emulator.
-6. **Share Content**: Share content to all or specific apps.
+## 🔧 Features
 
-## Installation
-Add the plugin to your `pubspec.yaml` file:
-```yaml
-flutter_essential:
-  git:
-    url: https://github.com/jaiswal4sudeep/flutter_essential.git
-```
+- Check **VPN** and **Internet** connectivity
+- Retrieve **device information** like ID and name
+- Access **app package info**
+- **Share content** to all or specific apps
+- **Launch apps** using package name
+- Use advanced **vibration** features (with patterns, feedback types)
+- Real-time stream updates for VPN and Internet status
 
-Run `flutter pub get` to fetch the package.
+---
 
-## Usage
+## 🚀 Getting Started
 
-### 1. VPN Status
-Detect if a VPN connection is active:
+### 1. Import the package
+
 ```dart
-bool isVpnConnected = await FlutterEssential.isVpnConnected();
-print('VPN Connected: \$isVpnConnected');
+import 'package:flutter_essential/flutter_essential.dart';
 ```
 
-### 2. Internet Connectivity
-Check if the device is connected to the internet (Wi-Fi or Mobile Data):
+---
+
+## 📡 Connectivity Monitoring
+
+### Start/Stop VPN Status Stream
+
 ```dart
-bool isInternetConnected = await FlutterEssential.isInternetConnected();
-print('Internet Connected: \$isInternetConnected');
+FlutterEssential.startVpnStatusUpdates();
+FlutterEssential.vpnStatusStream.listen((isConnected) {
+  print('VPN Connected: $isConnected');
+});
+
+// To stop:
+FlutterEssential.stopVpnStatusUpdates();
 ```
 
-### 3. Package Information
-Retrieve app metadata, such as the app name, package name, version, and build number:
+### Start/Stop Internet Status Stream
+
 ```dart
-PackageInfo? info = await FlutterEssential.getPackageInfo();
-print('App Name: \${info?.appName}');
-print('Package Name: \${info?.packageName}');
-print('Version: \${info?.version}');
-print('Build Number: \${info?.buildNumber}');
+FlutterEssential.startInternetStatusUpdates();
+FlutterEssential.internetStatusStream.listen((isConnected) {
+  print('Internet Connected: $isConnected');
+});
+
+// To stop:
+FlutterEssential.stopInternetStatusUpdates();
 ```
 
-### 4. Device ID
-Fetch the unique Android device ID:
+---
+
+## 📱 Device Information
+
 ```dart
-String? deviceId = await FlutterEssential.getDeviceId();
-print('Device ID: \$deviceId');
+final deviceId = await FlutterEssential.getDeviceId();
+final deviceName = await FlutterEssential.getDeviceName();
+final packageInfo = await FlutterEssential.getPackageInfo();
 ```
 
-### 5. Emulator Detection
-Determine if the app is running on an emulator:
+---
+
+## 📤 Sharing Content
+
+### Share to All Apps
+
 ```dart
-bool isEmulator = await FlutterEssential.isEmulator();
-print('Running on Emulator: \$isEmulator');
+await FlutterEssential.shareToAllApps(content: "Hello!");
 ```
 
-### 6. Share Content
+### Share to Specific App
 
-#### Share to All Apps
-Open the "Share to All Apps" dialog to share content with any app:
-```dart
-await FlutterEssential.shareToAllApps(content: "Check out this amazing plugin!");
-```
-
-#### Share to Specific App
-Share content to a specific app, such as WhatsApp or Telegram:
 ```dart
 await FlutterEssential.shareToSpecificApp(
-  content: "Hello from Flutter Essential!",
-  app: SharingApp.whatsapp, // Replace with SharingApp.telegram for Telegram
+  content: "Hello!",
+  app: SharingApp.whatsapp, // example
 );
 ```
 
-## Example
+---
+
+## 🚀 Launch App by Package Name
+
 ```dart
-import 'package:flutter_essential/flutter_essential.dart';
+await FlutterEssential.openApp(packageName: "com.example.app");
+```
 
-void main() async {
-  bool vpn = await FlutterEssential.isVpnConnected();
-  bool internet = await FlutterEssential.isInternetConnected();
-  bool emulator = await FlutterEssential.isEmulator();
-  
-  print('VPN: \$vpn, Internet: \$internet, Emulator: \$emulator');
+---
 
-  await FlutterEssential.shareToAllApps(content: "Sharing to all apps!");
-  await FlutterEssential.shareToSpecificApp(
-    content: "Sharing to WhatsApp!",
-    app: SharingApp.whatsapp,
-  );
+## 📳 Vibration Features
+
+### Basic Vibration
+
+```dart
+await FlutterEssential.vibrate(duration: 100);
+```
+
+### Pattern Vibration
+
+```dart
+await FlutterEssential.vibrateWithPattern(
+  pattern: [0, 100, 50, 200],
+  repeat: -1,
+);
+```
+
+### Cancel Vibration
+
+```dart
+await FlutterEssential.cancelVibration();
+```
+
+### Predefined Feedback
+
+```dart
+await FlutterEssential.lightVibration();
+await FlutterEssential.mediumVibration();
+await FlutterEssential.heavyVibration();
+```
+
+---
+
+## 📦 Package Info Structure
+
+```dart
+class PackageInfo {
+  final String appName;
+  final String packageName;
+  final String version;
+  final String buildNumber;
+
+  PackageInfo({
+    required this.appName,
+    required this.packageName,
+    required this.version,
+    required this.buildNumber,
+  });
 }
 ```
 
-## Permissions
-Add the following permissions to your `AndroidManifest.xml` file:
-```xml
-<uses-permission android:name="android.permission.INTERNET" />
-<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-```
+---
+
+## 🛠 Platform Integration
+
+Ensure proper method channels are implemented on Android and iOS as needed.
+
+---
+
+## 📃 License
+
+MIT License

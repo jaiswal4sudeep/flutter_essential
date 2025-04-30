@@ -147,16 +147,6 @@ class FlutterEssential {
     await _methodChannel.invokeMethod('shareToSpecificApp', arguments);
   }
 
-  //* Check if device is an emulator */
-  static Future<bool> isEmulator() async {
-    try {
-      return await _methodChannel.invokeMethod<bool>('isEmulator') ?? false;
-    } catch (e) {
-      debugPrint('Error checking if device is an emulator: $e');
-      return false;
-    }
-  }
-
   //* Open app using package name */
   static Future<void> openApp({
     required String packageName,
@@ -167,5 +157,73 @@ class FlutterEssential {
     };
 
     await _methodChannel.invokeMethod('shareToSpecificApp', arguments);
+  }
+
+  /// Vibration Methods
+
+  /// Vibrates the device for [duration] milliseconds
+  static Future<void> vibrate({required int duration}) async {
+    try {
+      await _methodChannel.invokeMethod('vibrate', {'duration': duration});
+    } on PlatformException catch (e) {
+      debugPrint('Failed to vibrate: ${e.message}');
+    }
+  }
+
+  /// Vibrates the device with a custom pattern
+  /// [pattern] - List of durations in milliseconds (wait, vibrate, wait, vibrate...)
+  /// [repeat] - Index at which to repeat the pattern (-1 for no repeat)
+  static Future<void> vibrateWithPattern({
+    required List<int> pattern,
+    required int repeat,
+  }) async {
+    try {
+      await _methodChannel.invokeMethod('vibrateWithPattern', {
+        'pattern': pattern,
+        'repeat': repeat,
+      });
+    } on PlatformException catch (e) {
+      debugPrint('Failed to vibrate with pattern: ${e.message}');
+    }
+  }
+
+  /// Cancels any ongoing vibration
+  static Future<void> cancelVibration() async {
+    try {
+      await _methodChannel.invokeMethod('cancelVibration');
+    } on PlatformException catch (e) {
+      debugPrint('Failed to cancel vibration: ${e.message}');
+    }
+  }
+
+  /// Checks if the device has a vibrator
+  static Future<bool> hasVibrator() async {
+    try {
+      return await _methodChannel.invokeMethod('hasVibrator') ?? false;
+    } on PlatformException catch (e) {
+      debugPrint('Failed to check vibrator: ${e.message}');
+      return false;
+    }
+  }
+
+  /// Convenience method for short feedback vibration
+  static Future<void> lightVibration() async {
+    if (await hasVibrator()) {
+      await vibrate(duration: 50);
+    }
+  }
+
+  /// Convenience method for medium feedback vibration
+  static Future<void> mediumVibration() async {
+    if (await hasVibrator()) {
+      await vibrate(duration: 110);
+    }
+  }
+
+  /// Convenience method for long feedback vibration
+  static Future<void> heavyVibration() async {
+    if (await hasVibrator()) {
+      await vibrate(duration: 200);
+    }
   }
 }

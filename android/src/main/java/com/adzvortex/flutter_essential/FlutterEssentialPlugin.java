@@ -7,6 +7,9 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Build;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.os.VibratorManager;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -57,10 +60,6 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
                 result.success(deviceName);
                 break;
 
-            case "isEmulator": 
-                result.success(isEmulator());
-                break;
-
             case "shareToSpecificApp":
                 String content = call.argument("content");
                 String app = call.argument("app");
@@ -71,6 +70,26 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
                 String allContent = call.argument("content");
                 shareToAllApps(allContent, result);
                 break;
+
+            case "vibrate":
+                int duration = call.argument("duration");
+                vibrate(duration, result);
+                break;
+
+            case "vibrateWithPattern":
+                List<Integer> pattern = call.argument("pattern");
+                int repeat = call.argument("repeat");
+                vibrateWithPattern(pattern, repeat, result);
+                break;
+
+            case "cancelVibration":
+                cancelVibration(result);
+                break;
+
+            case "hasVibrator":
+                result.success(hasVibrator());
+                break;
+
 
             default:
                 result.notImplemented();
@@ -151,26 +170,6 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
         }
     }
 
-    // Check if the device is an emulator
-    private boolean isEmulator() {
-        return (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
-                || Build.FINGERPRINT.startsWith("generic")
-                || Build.FINGERPRINT.startsWith("unknown")
-                || Build.HARDWARE.contains("goldfish")
-                || Build.HARDWARE.contains("ranchu")
-                || Build.MODEL.contains("google_sdk")
-                || Build.MODEL.contains("Emulator")
-                || Build.MODEL.contains("Android SDK built for x86")
-                || Build.MANUFACTURER.contains("Genymotion")
-                || Build.PRODUCT.contains("sdk_google")
-                || Build.PRODUCT.contains("google_sdk")
-                || Build.PRODUCT.contains("sdk")
-                || Build.PRODUCT.contains("sdk_x86")
-                || Build.PRODUCT.contains("vbox86p")
-                || Build.PRODUCT.contains("emulator")
-                || Build.PRODUCT.contains("simulator");
-    }
-
     // Share content to a specific app
     private void shareToSpecificApp(String content, String packageName, Result result) {
         try {
@@ -209,6 +208,76 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
         } catch (Exception e) {
             e.printStackTrace();
             result.error("ERROR", "Error sharing content.", e.getMessage());
+        }
+    }
+
+    private void vibrate(int duration, Result result) {
+        try {
+            Vibrator vibrator = getVibrator();
+            if (vibrator != null && vibrator.hasVibrator()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE));
+                } else {
+                    vibrator.vibrate(duration);
+                }
+                result.success(true);
+            } else {
+                result.success(false);
+            }
+        } catch (Exception e) {
+            result.error("VIBRATION_ERROR", "Failed to vibrate", e.getMessage());
+        }
+    }
+
+    private void vibrateWithPattern(List<Integer> pattern, int repeat, Result result) {
+        try {
+            Vibrator vibrator = getVibrator();
+            if (vibrator != null && vibrator.hasVibrator()) {
+                long[] patternArray = new long[pattern.size()];
+                for (int i = 0; i < pattern.size(); i++) {
+                    patternArray[i] = pattern.get(i);
+                }
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    vibrator.vibrate(VibrationEffect.createWaveform(patternArray, repeat));
+                } else {
+                    vibrator.vibrate(patternArray, repeat);
+                }
+                result.success(true);
+            } else {
+                result.success(false);
+            }
+        } catch (Exception e) {
+            result.error("VIBRATION_ERROR", "Failed to vibrate with pattern", e.getMessage());
+        }
+    }
+
+    private void cancelVibration(Result result) {
+        try {
+            Vibrator vibrator = getVibrator();
+            if (vibrator != null) {
+                vibrator.cancel();
+                result.success(true);
+            } else {
+                result.success(false);
+            }
+        } catch (Exception e) {
+            result.error("VIBRATION_ERROR", "Failed to cancel vibration", e.getMessage());
+        }
+    }
+
+    private boolean hasVibrator() {
+        Vibrator vibrator = getVibrator();
+        return vibrator != null && vibrator.hasVibrator();
+    }
+
+    @SuppressLint("NewApi")
+    private Vibrator getVibrator() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            VibratorManager vibratorManager = (VibratorManager) context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE);
+            return vibratorManager.getDefaultVibrator();
+        } else {
+            return (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         }
     }
 
