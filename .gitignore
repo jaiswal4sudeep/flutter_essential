@@ -22,4 +22,3 @@ migrate_working_dir/
 analysis_options.yaml
 .flutter-plugins-dependencies
 build/
-example/

@@ -1,4 +1,4 @@
-package com.adzvortex.flutter_essential;
+package com.sudeep.flutter_essential;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;

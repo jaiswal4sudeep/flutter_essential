@@ -1,4 +1,4 @@
-group = "com.adzvortex.flutter_essential"
+group = "com.sudeep.flutter_essential"
 version = "1.0"
 
 buildscript {
@@ -22,7 +22,7 @@ rootProject.allprojects {
 apply plugin: "com.android.library"
 
 android {
-    namespace = "com.adzvortex.flutter_essential"
+    namespace = "com.sudeep.flutter_essential"
 
     compileSdk = 35
 
@@ -37,7 +37,7 @@ android {
 
     dependencies {
         testImplementation("junit:junit:4.13.2")
-        testImplementation("org.mockito:mockito-core:5.2.0")
+        testImplementation("org.mockito:mockito-core:5.16.1")
     }
 
     testOptions {

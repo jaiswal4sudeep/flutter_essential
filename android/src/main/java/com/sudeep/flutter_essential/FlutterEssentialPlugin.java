@@ -1,4 +1,4 @@
-package com.adzvortex.flutter_essential;
+package com.sudeep.flutter_essential;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -89,7 +89,6 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
             case "hasVibrator":
                 result.success(hasVibrator());
                 break;
-
 
             default:
                 result.notImplemented();
