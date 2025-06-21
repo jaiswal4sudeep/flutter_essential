@@ -226,4 +226,13 @@ class FlutterEssential {
       await vibrate(duration: 200);
     }
   }
+
+  static Future<String> getInstallSource() async {
+    try {
+      return await _methodChannel.invokeMethod('getInstallSource') ?? '';
+    } catch (e) {
+      debugPrint('Error fetching install source: $e');
+      return '';
+    }
+  }
 }

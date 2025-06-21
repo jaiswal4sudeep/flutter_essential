@@ -90,9 +90,22 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
                 result.success(hasVibrator());
                 break;
 
+            case "getInstallSource":
+                result.success(getInstallSource());
+                break;
+
             default:
                 result.notImplemented();
                 break;
+        }
+    }
+
+    private String getInstallSource() {
+        try {
+            return context.getPackageManager().getInstallerPackageName(context.getPackageName());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
