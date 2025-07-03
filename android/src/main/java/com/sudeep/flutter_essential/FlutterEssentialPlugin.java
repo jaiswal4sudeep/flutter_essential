@@ -14,6 +14,7 @@ import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import com.google.android.gms.ads.identifier.AdvertisingIdClient;
 
 import java.net.NetworkInterface;
 import java.util.Collections;
@@ -92,6 +93,10 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
 
             case "getInstallSource":
                 result.success(getInstallSource());
+                break;
+
+            case "getGAID":
+                getGAID(result);
                 break;
 
             default:
@@ -291,6 +296,23 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
         } else {
             return (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         }
+    }
+
+    // Google Advertising ID Getter
+    private void getGAID(final Result result) {
+        new Thread(() -> {
+            try {
+                AdvertisingIdClient.Info idInfo = AdvertisingIdClient.getAdvertisingIdInfo(context);
+                if (idInfo != null) {
+                    result.success(idInfo.getId());
+                } else {
+                    result.success(null);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                result.error("ERROR", "Failed to get GAID", e.getMessage());
+            }
+        }).start();
     }
 
     @Override

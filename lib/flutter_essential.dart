@@ -235,4 +235,14 @@ class FlutterEssential {
       return '';
     }
   }
+
+  ///  Get Advertising ID
+  static Future<String> getAdvertisingId() async {
+    try {
+      return await _methodChannel.invokeMethod('getGAID') ?? '';
+    } catch (e) {
+      debugPrint('Error fetching advertising ID: $e');
+      return '';
+    }
+  }
 }

@@ -16,7 +16,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   void checkInstallSource() async {
-    final String source = await FlutterEssential.getInstallSource();
+    final String source = await FlutterEssential.getAdvertisingId();
     log("App installed from: $source");
   }
 
