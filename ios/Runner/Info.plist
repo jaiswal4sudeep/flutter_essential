@@ -1,0 +1,10 @@
+<key>NSUserTrackingUsageDescription</key>
+<string>This identifier will be used to deliver personalised ads to you.</string>
+
+<key>LSApplicationQueriesSchemes</key>
+<array>
+    <string>whatsapp</string>
+    <string>tg</string>
+    <string>instagram</string>
+    <string>fb-messenger</string>
+</array>

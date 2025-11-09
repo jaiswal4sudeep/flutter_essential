@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -104,7 +105,10 @@ class FlutterEssential {
   ///  Get Advertising ID
   static Future<String> getAdvertisingId() async {
     try {
-      return await _methodChannel.invokeMethod('getGAID') ?? '';
+      if (Platform.isAndroid) {
+        return await _methodChannel.invokeMethod('getGAID') ?? '';
+      }
+      return '';
     } catch (e) {
       debugPrint('Error fetching advertising ID: $e');
       return '';

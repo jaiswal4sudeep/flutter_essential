@@ -1,0 +1,6 @@
+target 'Runner' do
+  use_frameworks!  # optional; only if your project requires frameworks
+  pod 'AppTrackingTransparency'
+  pod 'AdSupport'
+  # ...
+end
