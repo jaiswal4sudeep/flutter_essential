@@ -1,8 +1,8 @@
-// ios/Classes/SwiftFlutterEssential.swift
 import Flutter
 import UIKit
 import AdSupport
 import AppTrackingTransparency
+import Security
 
 public class SwiftFlutterEssential: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -16,7 +16,8 @@ public class SwiftFlutterEssential: NSObject, FlutterPlugin {
     case "getPackageInfo":
       result(self.getPackageInfo())
     case "getAndroidId":
-      result(UIDevice.current.identifierForVendor?.uuidString ?? "")
+      // ✅ Replaced with permanent Keychain-based ID
+      result(self.getPermanentDeviceID())
     case "getDeviceName":
       result(UIDevice.current.name)
     case "shareToSpecificApp":
@@ -32,7 +33,6 @@ public class SwiftFlutterEssential: NSObject, FlutterPlugin {
         result(FlutterError(code: "BAD_ARGS", message: "content missing", details: nil))
       }
     case "getInstallSource":
-      // iOS doesn't expose installer package; return "App Store" or empty
       result("App Store")
     case "getGAID":
       self.getIDFA(result: result)
@@ -41,6 +41,7 @@ public class SwiftFlutterEssential: NSObject, FlutterPlugin {
     }
   }
 
+  // MARK: - App Info
   private func getPackageInfo() -> String {
     let bundle = Bundle.main
     let displayName = (bundle.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String) ??
@@ -48,7 +49,6 @@ public class SwiftFlutterEssential: NSObject, FlutterPlugin {
     let packageName = bundle.bundleIdentifier ?? ""
     let version = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
     let build = bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? ""
-    // Return same JSON string structure as Android Java code
     let json = [
       "appName": displayName,
       "packageName": packageName,
@@ -62,6 +62,20 @@ public class SwiftFlutterEssential: NSObject, FlutterPlugin {
     return "{}"
   }
 
+  // MARK: - Permanent Device ID (Keychain based)
+  private func getPermanentDeviceID() -> String {
+    let key = "com.flutteressential.permanentDeviceID"
+
+    if let existing = KeychainHelper.shared.get(forKey: key) {
+      return existing
+    }
+
+    let newId = UUID().uuidString
+    KeychainHelper.shared.set(newId, forKey: key)
+    return newId
+  }
+
+  // MARK: - Share Functions
   private func shareToAllApps(content: String, result: @escaping FlutterResult) {
     DispatchQueue.main.async {
       guard let vc = UIApplication.shared.keyWindow?.rootViewController else {
@@ -77,7 +91,6 @@ public class SwiftFlutterEssential: NSObject, FlutterPlugin {
   }
 
   private func shareToSpecificApp(content: String, app: String, result: @escaping FlutterResult) {
-    // app argument may be a package name from Android; map common packages to iOS URL schemes
     let scheme = schemeForPackageName(app)
     DispatchQueue.main.async {
       guard let vc = UIApplication.shared.keyWindow?.rootViewController else {
@@ -85,7 +98,6 @@ public class SwiftFlutterEssential: NSObject, FlutterPlugin {
         return
       }
 
-      // Try to open via URL scheme (app-specific share if supported)
       if let base = scheme, !base.isEmpty, let url = self.buildShareUrl(for: base, content: content), UIApplication.shared.canOpenURL(url) {
         UIApplication.shared.open(url, options: [:]) { success in
           result(success)
@@ -93,7 +105,6 @@ public class SwiftFlutterEssential: NSObject, FlutterPlugin {
         return
       }
 
-      // Fallback to share sheet
       let activityVC = UIActivityViewController(activityItems: [content], applicationActivities: nil)
       activityVC.popoverPresentationController?.sourceView = vc.view
       vc.present(activityVC, animated: true) {
@@ -125,7 +136,6 @@ public class SwiftFlutterEssential: NSObject, FlutterPlugin {
     case "tg":
       return URL(string: "tg://msg?text=\(encoded)")
     case "instagram":
-      // Instagram doesn't support arbitrary text share via URL scheme; open app
       return URL(string: "instagram://app")
     case "fb-messenger":
       return URL(string: "fb-messenger://share?text=\(encoded)")
@@ -134,20 +144,19 @@ public class SwiftFlutterEssential: NSObject, FlutterPlugin {
     }
   }
 
+  // MARK: - IDFA
   private func getIDFA(result: @escaping FlutterResult) {
-    // Request ATT permission if iOS 14+
     if #available(iOS 14, *) {
       ATTrackingManager.requestTrackingAuthorization { status in
         if status == .authorized {
           let idfa = ASIdentifierManager.shared().advertisingIdentifier.uuidString
-          // advertisingIdentifier returns zeros when limited; if so, return empty
           if idfa == "00000000-0000-0000-0000-000000000000" {
             result("")
           } else {
             result(idfa)
           }
         } else {
-          result("") // not authorized
+          result("")
         }
       }
     } else {
@@ -158,5 +167,37 @@ public class SwiftFlutterEssential: NSObject, FlutterPlugin {
         result("")
       }
     }
+  }
+}
+
+// MARK: - Keychain Helper
+class KeychainHelper {
+  static let shared = KeychainHelper()
+
+  func set(_ value: String, forKey key: String) {
+    let data = value.data(using: .utf8)!
+    let query = [
+      kSecClass: kSecClassGenericPassword,
+      kSecAttrAccount: key,
+      kSecValueData: data
+    ] as CFDictionary
+
+    SecItemDelete(query)
+    SecItemAdd(query, nil)
+  }
+
+  func get(forKey key: String) -> String? {
+    let query = [
+      kSecClass: kSecClassGenericPassword,
+      kSecAttrAccount: key,
+      kSecReturnData: true,
+      kSecMatchLimit: kSecMatchLimitOne
+    ] as CFDictionary
+
+    var result: AnyObject?
+    SecItemCopyMatching(query, &result)
+
+    guard let data = result as? Data else { return nil }
+    return String(data: data, encoding: .utf8)
   }
 }
