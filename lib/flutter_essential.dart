@@ -57,6 +57,16 @@ class FlutterEssential {
     }
   }
 
+  //* Get Android SDK */
+  static Future<int> getAndroidSDK() async {
+    try {
+      return await _methodChannel.invokeMethod('getAndroidSDK') ?? 0;
+    } catch (e) {
+      debugPrint('Error fetching android sdk: $e');
+      return 0;
+    }
+  }
+
   //* Share content to all apps */
   static Future<void> shareToAllApps({
     required String content,

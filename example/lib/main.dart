@@ -29,6 +29,7 @@ class PluginTestPage extends StatefulWidget {
 class _PluginTestPageState extends State<PluginTestPage> {
   String _packageInfo = 'Not fetched';
   String _deviceId = 'Not fetched';
+  int _androidVersion = 0;
   String _deviceName = 'Not fetched';
   String _installSource = 'Not fetched';
   String _advertisingId = 'Not fetched';
@@ -78,6 +79,18 @@ class _PluginTestPageState extends State<PluginTestPage> {
     } catch (e) {
       setState(() => _deviceName = 'Error: $e');
       _appendLog('getDeviceName error: $e');
+    }
+  }
+
+  Future<void> _fetchAnroidSDK() async {
+    setState(() => _lastAction = 'Fetching android sdk...');
+    try {
+      final id = await FlutterEssential.getAndroidSDK();
+      setState(() => _androidVersion = id);
+      _appendLog('getAndroidSDK: $_androidVersion');
+    } catch (e) {
+      setState(() => _androidVersion = 0);
+      _appendLog('getAndroidSDK error: $e');
     }
   }
 
@@ -234,6 +247,10 @@ class _PluginTestPageState extends State<PluginTestPage> {
                                 onPressed: _fetchAdvertisingId,
                                 child: const Text('getAdvertisingId'),
                               ),
+                              ElevatedButton(
+                                onPressed: _fetchAnroidSDK,
+                                child: const Text('getAndroidSDK'),
+                              ),
                             ],
                           ),
                           const SizedBox(height: 12),
@@ -281,6 +298,8 @@ class _PluginTestPageState extends State<PluginTestPage> {
                           Text('PackageInfo: $_packageInfo'),
                           const SizedBox(height: 6),
                           Text('DeviceId: $_deviceId'),
+                          const SizedBox(height: 6),
+                          Text('Android SDK: $_androidVersion'),
                           const SizedBox(height: 6),
                           Text('DeviceName: $_deviceName'),
                           const SizedBox(height: 6),

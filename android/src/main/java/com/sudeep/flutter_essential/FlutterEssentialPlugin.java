@@ -43,6 +43,10 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
                 result.success(deviceName);
                 break;
 
+            case "getAndroidSDK":
+                result.success(Build.VERSION.SDK_INT);
+                break;
+
             case "shareToSpecificApp":
                 String content = call.argument("content");
                 String app = call.argument("app");
