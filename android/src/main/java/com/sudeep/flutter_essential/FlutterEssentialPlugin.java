@@ -66,9 +66,53 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
                 getGAID(result);
                 break;
 
+            case "isRealDevice":
+                result.success(isRealDevice());
+                break;
+
+            case "isDeveloperMode":
+                result.success(isDeveloperMode());
+                break;
+
             default:
                 result.notImplemented();
                 break;
+        }
+    }
+
+    private boolean isRealDevice() {
+        String fingerprint = Build.FINGERPRINT != null ? Build.FINGERPRINT.toLowerCase() : "";
+        String model = Build.MODEL != null ? Build.MODEL.toLowerCase() : "";
+        String manufacturer = Build.MANUFACTURER != null ? Build.MANUFACTURER.toLowerCase() : "";
+        String brand = Build.BRAND != null ? Build.BRAND.toLowerCase() : "";
+        String device = Build.DEVICE != null ? Build.DEVICE.toLowerCase() : "";
+        String product = Build.PRODUCT != null ? Build.PRODUCT.toLowerCase() : "";
+
+        boolean isEmulator = fingerprint.contains("generic") ||
+                fingerprint.contains("unknown") ||
+                model.contains("google_sdk") ||
+                model.contains("emulator") ||
+                model.contains("android sdk built for x86") ||
+                manufacturer.contains("genymotion") ||
+                (brand.startsWith("generic") && device.startsWith("generic")) ||
+                product.contains("sdk_google") ||
+                product.contains("google_sdk") ||
+                product.contains("sdk") ||
+                product.contains("sdk_x86") ||
+                product.contains("vbox86p") ||
+                product.contains("emulator") ||
+                product.contains("simulator");
+
+        return !isEmulator;  
+    }
+
+    private boolean isDeveloperMode() {
+        try {
+            int devMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.DEVELOPER_OPTIONS_ENABLED, 0);
+            return devMode == 1;
+        } catch (Settings.SettingNotFoundException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
