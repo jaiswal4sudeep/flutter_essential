@@ -70,10 +70,6 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
                 result.success(isRealDevice());
                 break;
 
-            case "isDeveloperMode":
-                result.success(isDeveloperMode());
-                break;
-
             default:
                 result.notImplemented();
                 break;
@@ -104,16 +100,6 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
                 product.contains("simulator");
 
         return !isEmulator;  
-    }
-
-    private boolean isDeveloperMode() {
-        try {
-            int devMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.DEVELOPER_OPTIONS_ENABLED, 0);
-            return devMode == 1;
-        } catch (Settings.SettingNotFoundException e) {
-            e.printStackTrace();
-            return false;
-        }
     }
 
     private String getInstallSource() {

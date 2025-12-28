@@ -67,16 +67,6 @@ class FlutterEssential {
     }
   }
 
-  //* Check if developer options are enabled */
-  static Future<bool> isDeveloperMode() async {
-    try {
-      return await _methodChannel.invokeMethod('isDeveloperMode') ?? false;
-    } catch (e) {
-      debugPrint('Error checking if developer mode is enabled: $e');
-      return false;
-    }
-  }
-
   //* Get Android SDK */
   static Future<int> getAndroidSDK() async {
     try {
