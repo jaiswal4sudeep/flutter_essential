@@ -123,6 +123,8 @@ public class SwiftFlutterEssential: NSObject, FlutterPlugin {
       return "instagram"
     case "com.facebook.orca":
       return "fb-messenger"
+    case "com.twitter.android":
+      return "twitter"
     default:
       return nil
     }

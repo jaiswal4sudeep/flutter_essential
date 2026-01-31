@@ -34,7 +34,8 @@ enum SharingApp {
   whatsapp,
   telegram,
   instagram,
-  facebookMessenger;
+  facebookMessenger,
+  twitter;
 
   String get packageName {
     switch (this) {
@@ -46,6 +47,8 @@ enum SharingApp {
         return 'com.instagram.android';
       case SharingApp.facebookMessenger:
         return 'com.facebook.orca';
+      case SharingApp.twitter:
+        return 'com.twitter.android';
     }
   }
 }
