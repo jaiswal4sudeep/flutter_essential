@@ -29,8 +29,10 @@ class PluginTestPage extends StatefulWidget {
 class _PluginTestPageState extends State<PluginTestPage> {
   String _packageInfo = 'Not fetched';
   String _deviceId = 'Not fetched';
-  int _androidVersion = 0;
   String _deviceName = 'Not fetched';
+  String _realDevice = 'Not checked';
+  String _developerMode = 'Not checked';
+  String _usbDebugging = 'Not checked';
   String _installSource = 'Not fetched';
   String _advertisingId = 'Not fetched';
   String _lastAction = 'Idle';
@@ -82,15 +84,39 @@ class _PluginTestPageState extends State<PluginTestPage> {
     }
   }
 
-  Future<void> _fetchAnroidSDK() async {
-    setState(() => _lastAction = 'Fetching android sdk...');
+  Future<void> _checkRealDevice() async {
+    setState(() => _lastAction = 'Checking physical device...');
     try {
-      final id = await FlutterEssential.getAndroidSDK();
-      setState(() => _androidVersion = id);
-      _appendLog('getAndroidSDK: $_androidVersion');
+      final value = await FlutterEssential.isRealDevice();
+      setState(() => _realDevice = value.toString());
+      _appendLog('isRealDevice: $_realDevice');
     } catch (e) {
-      setState(() => _androidVersion = 0);
-      _appendLog('getAndroidSDK error: $e');
+      setState(() => _realDevice = 'Error: $e');
+      _appendLog('isRealDevice error: $e');
+    }
+  }
+
+  Future<void> _checkDeveloperMode() async {
+    setState(() => _lastAction = 'Checking developer mode...');
+    try {
+      final value = await FlutterEssential.isDeveloperModeEnabled();
+      setState(() => _developerMode = value.toString());
+      _appendLog('isDeveloperModeEnabled: $_developerMode');
+    } catch (e) {
+      setState(() => _developerMode = 'Error: $e');
+      _appendLog('isDeveloperModeEnabled error: $e');
+    }
+  }
+
+  Future<void> _checkUsbDebugging() async {
+    setState(() => _lastAction = 'Checking USB debugging...');
+    try {
+      final value = await FlutterEssential.isUsbDebuggingEnabled();
+      setState(() => _usbDebugging = value.toString());
+      _appendLog('isUsbDebuggingEnabled: $_usbDebugging');
+    } catch (e) {
+      setState(() => _usbDebugging = 'Error: $e');
+      _appendLog('isUsbDebuggingEnabled error: $e');
     }
   }
 
@@ -165,6 +191,9 @@ class _PluginTestPageState extends State<PluginTestPage> {
     await _fetchPackageInfo();
     await _fetchDeviceId();
     await _fetchDeviceName();
+    await _checkRealDevice();
+    await _checkDeveloperMode();
+    await _checkUsbDebugging();
     // share functions will open share sheet / external apps; call them but note user interaction might be required
     await _shareToAll();
     await _shareToSpecific(SharingApp.whatsapp);
@@ -248,8 +277,16 @@ class _PluginTestPageState extends State<PluginTestPage> {
                                 child: const Text('getAdvertisingId'),
                               ),
                               ElevatedButton(
-                                onPressed: _fetchAnroidSDK,
-                                child: const Text('getAndroidSDK'),
+                                onPressed: _checkRealDevice,
+                                child: const Text('isRealDevice'),
+                              ),
+                              ElevatedButton(
+                                onPressed: _checkDeveloperMode,
+                                child: const Text('isDeveloperModeEnabled'),
+                              ),
+                              ElevatedButton(
+                                onPressed: _checkUsbDebugging,
+                                child: const Text('isUsbDebuggingEnabled'),
                               ),
                             ],
                           ),
@@ -299,9 +336,13 @@ class _PluginTestPageState extends State<PluginTestPage> {
                           const SizedBox(height: 6),
                           Text('DeviceId: $_deviceId'),
                           const SizedBox(height: 6),
-                          Text('Android SDK: $_androidVersion'),
-                          const SizedBox(height: 6),
                           Text('DeviceName: $_deviceName'),
+                          const SizedBox(height: 6),
+                          Text('RealDevice: $_realDevice'),
+                          const SizedBox(height: 6),
+                          Text('DeveloperMode: $_developerMode'),
+                          const SizedBox(height: 6),
+                          Text('UsbDebugging: $_usbDebugging'),
                           const SizedBox(height: 6),
                           Text('InstallSource: $_installSource'),
                           const SizedBox(height: 6),

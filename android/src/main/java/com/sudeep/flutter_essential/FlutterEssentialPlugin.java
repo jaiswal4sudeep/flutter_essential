@@ -43,8 +43,12 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
                 result.success(deviceName);
                 break;
 
-            case "getAndroidSDK":
-                result.success(Build.VERSION.SDK_INT);
+            case "isDeveloperModeEnabled":
+                result.success(isDeveloperModeEnabled());
+                break;
+
+            case "isUsbDebuggingEnabled":
+                result.success(isUsbDebuggingEnabled());
                 break;
 
             case "shareToSpecificApp":
@@ -99,7 +103,33 @@ public class FlutterEssentialPlugin implements FlutterPlugin, MethodCallHandler 
                 product.contains("emulator") ||
                 product.contains("simulator");
 
-        return !isEmulator;  
+        return !isEmulator;
+    }
+
+    private boolean isDeveloperModeEnabled() {
+        try {
+            return Settings.Global.getInt(
+                    context.getContentResolver(),
+                    Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
+                    0
+            ) == 1;
+        } catch (Exception e) {
+            Log.e("FlutterEssentialPlugin", "Error checking developer mode", e);
+            return false;
+        }
+    }
+
+    private boolean isUsbDebuggingEnabled() {
+        try {
+            return Settings.Global.getInt(
+                    context.getContentResolver(),
+                    Settings.Global.ADB_ENABLED,
+                    0
+            ) == 1;
+        } catch (Exception e) {
+            Log.e("FlutterEssentialPlugin", "Error checking USB debugging", e);
+            return false;
+        }
     }
 
     private String getInstallSource() {

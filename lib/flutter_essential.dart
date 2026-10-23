@@ -67,13 +67,25 @@ class FlutterEssential {
     }
   }
 
-  //* Get Android SDK */
-  static Future<int> getAndroidSDK() async {
+  //* Check whether Android Developer options are enabled */
+  static Future<bool> isDeveloperModeEnabled() async {
     try {
-      return await _methodChannel.invokeMethod('getAndroidSDK') ?? 0;
+      return await _methodChannel.invokeMethod('isDeveloperModeEnabled') ??
+          false;
     } catch (e) {
-      debugPrint('Error fetching android sdk: $e');
-      return 0;
+      debugPrint('Error checking developer mode: $e');
+      return false;
+    }
+  }
+
+  //* Check whether Android USB debugging is enabled */
+  static Future<bool> isUsbDebuggingEnabled() async {
+    try {
+      return await _methodChannel.invokeMethod('isUsbDebuggingEnabled') ??
+          false;
+    } catch (e) {
+      debugPrint('Error checking USB debugging: $e');
+      return false;
     }
   }
 
@@ -113,6 +125,7 @@ class FlutterEssential {
     await _methodChannel.invokeMethod('shareToSpecificApp', arguments);
   }
 
+  ///*  Get Install Source
   static Future<String> getInstallSource() async {
     try {
       return await _methodChannel.invokeMethod('getInstallSource') ?? '';
@@ -122,7 +135,7 @@ class FlutterEssential {
     }
   }
 
-  ///  Get Advertising ID
+  ///*  Get Advertising ID
   static Future<String> getAdvertisingId() async {
     try {
       if (Platform.isAndroid) {
